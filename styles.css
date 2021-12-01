@@ -1,4 +1,33 @@
-/* Sets all the text color to red! */
-body {
-    color: red;
+.link-wrapper {
+	display: flex;
+	gap: 7px;
+	padding: 1px 0;
+}
+
+.collapse-icon:hover:not(.no-links) {
+	cursor: pointer;
+	background-color: var(--background-secondary-alt);
+	color: var(--text-normal);
+}
+
+.collapse-icon {
+	border: 1px solid transparent;
+	border-radius: 3px;
+	cursor: pointer;
+	padding: 0 7px;
+	min-width: 22px; /* 8 (icon width) + 7*2 (padding) */
+}
+
+.no-links {
+	cursor: initial;
+}
+
+.link-list {
+	transition: max-height 100ms cubic-bezier(0.02, 0.01, 0.47, 1) 0s;
+	overflow: hidden;
+	padding-left: 0;
+}
+
+.link-list > .link-list {
+	padding-left: 15px;
 }
