@@ -40,5 +40,3 @@ Create a list and add one internal list per line. When rendered the list items w
 - [ ] Add settings to configure the plugin
 	- [ ] Setting to change list markers (also for links without sub links)
 	- [ ] Other styling features (padding, indentations, etc)
-- [ ] If a link occurs multiple times in a file, only show it once
-- [ ] If multiple links are in one line, they all unfold together in one list (maybe it's a feature)

@@ -1,6 +1,7 @@
 import {App, setIcon, TFile} from "obsidian";
 import CollapsibleList from "./CollapsibleList";
 import LinkInfo from "./LinkInfo";
+import {uniqBy} from "lodash";
 
 export class FoldableLink {
 	private app: App;
@@ -38,13 +39,14 @@ export class FoldableLink {
 		return this.subLinks.length > 0;
 	}
 
-	private static async searchLinks(app: App, currentFile: TFile | null) {
+	private static async searchLinks(app: App, currentFile: TFile | null): Promise<LinkInfo[]> {
 		if (!currentFile)
 			return [];
 
 		const content = await app.vault.cachedRead(currentFile);
 		const matches = Array.from(content.matchAll(/\[\[(.+?)]]/g));
-		return matches.map(match => LinkInfo.fromRawText(match[1]));
+		const links = matches.map(match => LinkInfo.fromRawText(match[1]));
+		return uniqBy(links, link => link.name)
 	}
 
 	private static styleWrapper(wrapper: HTMLElement) {

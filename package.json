@@ -11,6 +11,7 @@
 	"author": "",
 	"license": "MIT",
 	"devDependencies": {
+		"@types/lodash": "^4.14.177",
 		"@types/node": "^16.11.6",
 		"@typescript-eslint/eslint-plugin": "^5.2.0",
 		"@typescript-eslint/parser": "^5.2.0",
@@ -19,5 +20,8 @@
 		"obsidian": "^0.12.17",
 		"tslib": "2.3.1",
 		"typescript": "4.4.4"
+	},
+	"dependencies": {
+		"lodash": "^4.17.21"
 	}
 }
