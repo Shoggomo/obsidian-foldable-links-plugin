@@ -5,6 +5,7 @@ import {
 
 import {FoldableLink} from "./FoldableLink";
 import FoldableLinksSettingTab from "./SettingsTab";
+import LinkInfo from "./LinkInfo";
 
 interface FoldableLinksSettings {
 	mySetting: string;
@@ -39,18 +40,17 @@ export default class FoldableLinksPlugin extends Plugin {
 	convertLinkListIntoFoldable(el: HTMLElement, ctx: MarkdownPostProcessorContext) {
 		const linkListItems = el.querySelectorAll("ul > li > a.internal-link");
 
-		console.log(linkListItems)
-
-		linkListItems.forEach(async link => {
+		linkListItems.forEach(async linkElement => {
+			const linkInfo = LinkInfo.fromElement(linkElement as HTMLLinkElement);
 			const sourcePath = ctx.sourcePath;
-			const subFile = this.app.metadataCache.getFirstLinkpathDest(link.getText(), sourcePath)
-			const li = link.parentNode as HTMLElement;
+			const subFile = this.app.metadataCache.getFirstLinkpathDest(linkInfo.path, sourcePath)
+			const li = linkElement.parentNode as HTMLElement;
 			const ul = li.parentNode as HTMLElement; // This is save, because the above selector ensures two parents
 
-			await FoldableLink.createFoldableLink(this.app, link.getText(), subFile, li);
+			await FoldableLink.createFoldableLink(this.app, linkInfo, subFile, li);
 			ul.addClass("link-list")
 
-			link.remove();
+			linkElement.remove();
 		});
 	}
 }

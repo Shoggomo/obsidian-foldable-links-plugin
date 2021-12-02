@@ -1,5 +1,6 @@
 import {App, setIcon, TFile} from "obsidian";
 import CollapsibleList from "./CollapsibleList";
+import LinkInfo from "./LinkInfo";
 
 export class FoldableLink {
 	private app: App;
@@ -7,7 +8,7 @@ export class FoldableLink {
 	private wrapper: HTMLElement;
 	private link: HTMLElement;
 	private collapseIcon: HTMLElement;
-	private subLinks: string[];
+	private subLinks: LinkInfo[];
 	private list: CollapsibleList | null = null;
 
 	public get element() {
@@ -15,18 +16,18 @@ export class FoldableLink {
 	}
 
 
-	public static async createFoldableLink(app: App, linkPath: string, file: TFile | null, parent: HTMLElement) {
-		const subLinks = await FoldableLink.searchLinkpaths(app, file);
-		return new FoldableLink(app, linkPath, file, parent, subLinks);
+	public static async createFoldableLink(app: App, linkInfo: LinkInfo, file: TFile | null, parent: HTMLElement) {
+		const subLinks = await FoldableLink.searchLinks(app, file);
+		return new FoldableLink(app, linkInfo, file, parent, subLinks);
 	}
 
-	private constructor(app: App, linkPath: string, file: TFile | null, parent: HTMLElement, subLinks: string[]) {
+	private constructor(app: App, linkInfo: LinkInfo, file: TFile | null, parent: HTMLElement, subLinks: LinkInfo[]) {
 		this.app = app;
 		this.currentFile = file;
 		this.subLinks = subLinks;
 		this.collapseIcon = this.createCollapseIconElement();
 		this.wrapper = parent;
-		this.link = this.createLinkElement(linkPath);
+		this.link = this.createLinkElement(linkInfo);
 
 		FoldableLink.styleWrapper(this.wrapper);
 		this.addOnClickListener();
@@ -37,13 +38,13 @@ export class FoldableLink {
 		return this.subLinks.length > 0;
 	}
 
-	private static async searchLinkpaths(app: App, currentFile: TFile | null) {
+	private static async searchLinks(app: App, currentFile: TFile | null) {
 		if (!currentFile)
 			return [];
 
 		const content = await app.vault.cachedRead(currentFile);
 		const matches = Array.from(content.matchAll(/\[\[(.+?)]]/g));
-		return matches.map(match => match[1]);
+		return matches.map(match => LinkInfo.fromRawText(match[1]));
 	}
 
 	private static styleWrapper(wrapper: HTMLElement) {
@@ -65,7 +66,7 @@ export class FoldableLink {
 		if (!this.hasSublinks() || !this.currentFile)
 			return;
 
-		this.wrapper.onClickEvent(async () => {
+		this.collapseIcon.onClickEvent(async () => {
 			if (!this.list) {
 				this.list = await this.createList();
 				this.list.element.insertAfter(this.wrapper)
@@ -75,13 +76,13 @@ export class FoldableLink {
 
 	}
 
-	private createLinkElement(filepath: string) {
+	private createLinkElement(link: LinkInfo) {
 		return createEl("a", {
-			text: filepath,
+			text: link.name,
 			cls: `internal-link ${!this.currentFile ? "is-unresolved" : ""}`,
-			href: filepath,
+			href: link.path,
 			attr: {
-				"data-href": filepath,
+				"data-href": link.path,
 				target: "_blank",
 				rel: "noopener",
 			}
@@ -93,10 +94,10 @@ export class FoldableLink {
 			cls: "link-list"
 		});
 
-		const lis = await Promise.all(this.subLinks.map(async linkpath => {
+		const lis = await Promise.all(this.subLinks.map(async linkInfo => {
 			const li = createEl("li");
-			const subFile = this.currentFile ? this.app.metadataCache.getFirstLinkpathDest(linkpath, this.currentFile.path) : null;
-			const foldableLink = await FoldableLink.createFoldableLink(this.app, linkpath, subFile, li);
+			const subFile = this.currentFile ? this.app.metadataCache.getFirstLinkpathDest(linkInfo.path, this.currentFile.path) : null;
+			const foldableLink = await FoldableLink.createFoldableLink(this.app, linkInfo, subFile, li);
 			return foldableLink.element;
 		}))
 
