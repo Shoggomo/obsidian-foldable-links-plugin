@@ -7,7 +7,6 @@ export class FoldableLink {
 	private app: App;
 	private currentFile: TFile | null;
 	private wrapper: HTMLElement;
-	private link: HTMLElement;
 	private collapseIcon: HTMLElement;
 	private subLinks: LinkInfo[];
 	private list: CollapsibleList | null = null;
@@ -17,22 +16,23 @@ export class FoldableLink {
 	}
 
 
-	public static async createFoldableLink(app: App, linkInfo: LinkInfo, file: TFile | null, parent: HTMLElement) {
+	public static async createFoldableLink(app: App, linkInfo: LinkInfo, file: TFile | null, parent: HTMLElement, path: string[]) {
 		const subLinks = await FoldableLink.searchLinks(app, file);
-		return new FoldableLink(app, linkInfo, file, parent, subLinks);
+		const parentLinksFiltered = subLinks.filter(link => !path.includes(link.path));
+		return new FoldableLink(app, linkInfo, file, parent, parentLinksFiltered, path);
 	}
 
-	private constructor(app: App, linkInfo: LinkInfo, file: TFile | null, parent: HTMLElement, subLinks: LinkInfo[]) {
+	private constructor(app: App, linkInfo: LinkInfo, file: TFile | null, parent: HTMLElement, subLinks: LinkInfo[], path: string[]) {
 		this.app = app;
 		this.currentFile = file;
-		this.subLinks = subLinks;
+		this.subLinks = subLinks.filter(link => !path.includes(link.path));
 		this.collapseIcon = this.createCollapseIconElement();
 		this.wrapper = parent;
-		this.link = this.createLinkElement(linkInfo);
 
 		FoldableLink.styleWrapper(this.wrapper);
-		this.addOnClickListener();
-		parent.prepend(this.collapseIcon, this.link);
+		this.addOnClickListener(path);
+		const linkElement = this.createLinkElement(linkInfo);
+		parent.prepend(this.collapseIcon, linkElement);
 	}
 
 	private hasSublinks() {
@@ -64,13 +64,13 @@ export class FoldableLink {
 		return collapseElement;
 	}
 
-	private addOnClickListener() {
+	private addOnClickListener(path: string[]) {
 		if (!this.hasSublinks() || !this.currentFile)
 			return;
 
 		this.collapseIcon.onClickEvent(async () => {
 			if (!this.list) {
-				this.list = await this.createList();
+				this.list = await this.createList(path);
 				this.list.element.insertAfter(this.wrapper)
 			}
 			this.toggleList(this.list);
@@ -91,7 +91,7 @@ export class FoldableLink {
 		});
 	}
 
-	async createList() {
+	async createList(path: string[]) {
 		const subList = new CollapsibleList({
 			cls: "link-list"
 		});
@@ -99,7 +99,7 @@ export class FoldableLink {
 		const lis = await Promise.all(this.subLinks.map(async linkInfo => {
 			const li = createEl("li");
 			const subFile = this.currentFile ? this.app.metadataCache.getFirstLinkpathDest(linkInfo.path, this.currentFile.path) : null;
-			const foldableLink = await FoldableLink.createFoldableLink(this.app, linkInfo, subFile, li);
+			const foldableLink = await FoldableLink.createFoldableLink(this.app, linkInfo, subFile, li, [...path, linkInfo.path]);
 			return foldableLink.element;
 		}))
 

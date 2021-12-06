@@ -36,7 +36,8 @@ Create a list and add one internal list per line. When rendered the list items w
 
 ## TODOs / Bugs
 
-- [ ] Better project structure
-- [ ] Add settings to configure the plugin
-	- [ ] Setting to change list markers (also for links without sub links)
-	- [ ] Other styling features (padding, indentations, etc)
+- Better project structure
+- Add settings to configure the plugin
+    - Setting to change list markers (also for links without sub links)
+    - Other styling features (padding, indentations, etc)
+- Decide on bahaviour on mixed lists (links and normal text)

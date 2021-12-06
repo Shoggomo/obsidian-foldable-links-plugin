@@ -45,9 +45,10 @@ export default class FoldableLinksPlugin extends Plugin {
 			const sourcePath = ctx.sourcePath;
 			const subFile = this.app.metadataCache.getFirstLinkpathDest(linkInfo.path, sourcePath)
 			const li = linkElement.parentNode as HTMLElement;
-			const ul = li.parentNode as HTMLElement; // This is save, because the above selector ensures two parents
+			const ul = li.parentNode as HTMLElement;
+			const path = [sourcePath.replace(".md", ""), linkInfo.path];
 
-			await FoldableLink.createFoldableLink(this.app, linkInfo, subFile, li);
+			await FoldableLink.createFoldableLink(this.app, linkInfo, subFile, li, path);
 			ul.addClass("link-list")
 
 			linkElement.remove();
