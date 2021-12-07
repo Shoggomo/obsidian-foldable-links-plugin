@@ -1,4 +1,5 @@
 import {
+	addIcon,
 	MarkdownPostProcessorContext,
 	Plugin,
 } from 'obsidian';
@@ -21,6 +22,8 @@ export default class FoldableLinksPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
+		this.addIcons();
+
 		this.addSettingTab(new FoldableLinksSettingTab(this.app, this));
 
 		this.registerMarkdownPostProcessor(this.convertLinkListIntoFoldable.bind(this))
@@ -35,6 +38,10 @@ export default class FoldableLinksPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+	}
+
+	addIcons() {
+		addIcon("circle", `<circle cx="50" cy="50" r="34" fill="currentColor" />`)
 	}
 
 	convertLinkListIntoFoldable(el: HTMLElement, ctx: MarkdownPostProcessorContext) {

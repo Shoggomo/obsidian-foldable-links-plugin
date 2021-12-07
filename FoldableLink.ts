@@ -58,7 +58,7 @@ export class FoldableLink {
 			cls: `collapse-icon ${!this.hasSublinks() ? "no-links" : ""}`,
 		});
 
-		const iconId = this.hasSublinks() ? "right-triangle" : "dot";
+		const iconId = this.hasSublinks() ? "right-triangle" : "circle";
 		setIcon(collapseElement, iconId, 8)
 
 		return collapseElement;
